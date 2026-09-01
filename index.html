@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>스티커팩 포장소</title>
+<style>
+  @font-face{
+    font-family:'KblJumpExtended';
+    src:url('KBLJump_EB_Extended.otf') format('opentype'),
+        url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-5@1.0/KBLJump_EB_ExtendedTTF.woff2') format('woff2');
+    font-weight:normal; font-display:swap;
+  }
+  :root{
+    --ink:#5B4238;
+    --paper:#FDFBF4;
+    --gridline:rgba(150,185,215,.26);
+    --blue:#A8C8E8;
+    --pink:#F6C3D4;
+    --butter:#FFE3A3;
+    --mint:#B9E4D6;
+    --lilac:#DCCFF2;
+    --check:rgba(168,200,232,.5);
+    --check-base:#F3F8FC;
+    --round:"Arial Rounded MT Bold","Apple SD Gothic Neo","Pretendard",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;min-height:100%}
+  body{
+    color:var(--ink);
+    background:
+      linear-gradient(var(--gridline) 1px, transparent 1px) 0 0/25px 25px,
+      linear-gradient(90deg, var(--gridline) 1px, transparent 1px) 0 0/25px 25px,
+      var(--paper);
+    font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  }
+  button,input,select{font:inherit;color:inherit}
+  [hidden]{display:none !important}
+
+  /* ============ 로딩 ============ */
+  #loader{
+    position:fixed;inset:0;z-index:60;
+    background:
+      linear-gradient(var(--gridline) 1px, transparent 1px) 0 0/25px 25px,
+      linear-gradient(90deg, var(--gridline) 1px, transparent 1px) 0 0/25px 25px,
+      var(--paper);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+    transition:opacity .5s ease, visibility .5s;
+  }
+  #loader.gone{opacity:0;visibility:hidden}
+  .loadbag{
+    width:186px;height:208px;border:2.5px solid var(--ink);border-radius:18px;
+    background:rgba(255,255,255,.72);position:relative;overflow:hidden;
+    box-shadow:6px 6px 0 var(--blue);
+  }
+  .loadbag .band{
+    position:absolute;inset:0 0 auto;height:62px;background:var(--pink);
+    border-bottom:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center;
+    color:var(--ink);font-family:var(--round);font-size:22px;letter-spacing:.1em;
+    animation:bandDrop 2.4s cubic-bezier(.2,1.4,.4,1) infinite;
+  }
+  .loadbag i{
+    position:absolute;display:block;width:44px;height:44px;border-radius:12px;
+    border:2.5px solid var(--ink);background:#fff;
+    animation:fallIn 2.4s cubic-bezier(.25,1.3,.4,1) infinite;
+  }
+  .loadbag i:nth-child(2){left:24px;background:var(--butter);animation-delay:.1s}
+  .loadbag i:nth-child(3){left:71px;background:var(--mint);animation-delay:.3s}
+  .loadbag i:nth-child(4){left:118px;background:var(--lilac);animation-delay:.5s}
+  @keyframes fallIn{
+    0%{transform:translateY(-92px) rotate(-30deg);opacity:0}
+    30%{opacity:1}
+    45%{transform:translateY(94px) rotate(6deg)}
+    55%,100%{transform:translateY(86px) rotate(-4deg);opacity:1}
+  }
+  @keyframes bandDrop{ 0%,55%{transform:translateY(-70px)} 70%,100%{transform:translateY(0)} }
+  .bar{width:206px;height:14px;border:2.5px solid var(--ink);border-radius:99px;background:#fff;overflow:hidden}
+  .bar span{display:block;height:100%;width:0;background:var(--pink);transition:width .3s}
+  #loadWord{font-weight:700;font-size:14.5px}
+
+  /* ============ 머리말 ============ */
+  .wrap{max-width:1200px;margin:0 auto;padding:26px 18px 76px}
+  header.top{position:relative;margin-bottom:26px;padding-top:30px}
+  h1{
+    margin:0;font-family:var(--round);font-weight:800;
+    font-size:clamp(32px,5.6vw,56px);line-height:1.02;letter-spacing:-.01em;
+  }
+  .outlined{
+    text-shadow:
+      3px 0 #fff,-3px 0 #fff,0 3px #fff,0 -3px #fff,
+      2px 2px #fff,-2px 2px #fff,2px -2px #fff,-2px -2px #fff,
+      5px 6px 0 var(--blue);
+  }
+  .lede{margin:12px 0 0;font-size:14px;opacity:.8;max-width:52ch}
+  .deco{position:absolute;pointer-events:none;user-select:none}
+  .tag{font-family:"Courier New",monospace;font-weight:700;font-size:15px}
+  .t1{top:2px;right:74px;color:var(--pink);transform:rotate(3deg)}
+  .t2{top:74px;right:8px;color:var(--blue);transform:rotate(-4deg)}
+  .star{font-size:20px}
+  .s1{top:52px;left:-6px;color:var(--butter);transform:rotate(12deg)}
+  .s2{bottom:-6px;left:44%;color:var(--pink)}
+  .play{
+    position:absolute;top:2px;left:2px;pointer-events:none;user-select:none;font-size:12.5px;font-weight:800;color:var(--blue);
+    letter-spacing:.06em;
+  }
+  .win{
+    top:-4px;right:150px;width:132px;background:#fff;border:2px solid var(--ink);
+    border-radius:4px;box-shadow:4px 4px 0 rgba(91,66,56,.18);transform:rotate(4deg);
+    font-size:11.5px;
+  }
+  .win .winbar{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--blue);border-bottom:2px solid var(--ink);padding:2px 5px;
+  }
+  .win .winbar span{width:52px;height:5px;background:rgba(255,255,255,.75);border-radius:2px}
+  .win .winbar b{font-size:11px;line-height:1}
+  .win p{margin:9px 8px 6px;text-align:center}
+  .win .ok{font-style:normal;
+    display:block;width:46px;margin:0 auto 9px;border:2px solid var(--ink);border-radius:3px;
+    text-align:center;font-weight:700;background:#F4F4F4;
+  }
+
+  /* ============ 본문 ============ */
+  #studio{display:grid;grid-template-columns:1fr 348px;gap:26px;align-items:start}
+  .stage{
+    border:2.5px solid var(--ink);border-radius:20px;overflow:hidden;position:relative;
+    box-shadow:6px 6px 0 var(--pink);
+    background:
+      repeating-linear-gradient(90deg, var(--check) 0 26px, transparent 26px 52px),
+      repeating-linear-gradient(0deg, var(--check) 0 26px, transparent 26px 52px),
+      var(--check-base);
+  }
+  .stage canvas{display:block;width:100%;height:auto;touch-action:manipulation;cursor:grab}
+  .stage canvas:focus-visible{outline:4px solid var(--pink);outline-offset:-4px}
+  .stage.showcase{
+    position:fixed;z-index:45;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:min(88vw,74vh);box-shadow:8px 8px 0 var(--pink);
+    animation:pop .42s cubic-bezier(.2,1.3,.35,1);
+  }
+  @keyframes pop{from{transform:translate(-50%,-50%) scale(.86);opacity:.4}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+  #backdrop{position:fixed;inset:0;z-index:40;background:rgba(91,66,56,.45);opacity:0;transition:opacity .35s}
+  #backdrop.on{opacity:1}
+  .hint{
+    position:absolute;left:50%;bottom:14px;transform:translateX(-50%) rotate(-1.4deg);
+    background:#fff;border:2px solid var(--ink);border-radius:999px;padding:5px 14px;
+    font-size:12.5px;font-weight:700;box-shadow:3px 3px 0 var(--butter);white-space:nowrap;
+    opacity:0;transition:opacity .4s;pointer-events:none;
+  }
+  .hint.on{opacity:1}
+  .under{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap;font-size:13px}
+  .ghost{background:#fff;border:2px solid var(--ink);border-radius:999px;padding:6px 13px;font-weight:700;cursor:pointer}
+  .note{opacity:.66;font-size:12.5px}
+
+  .rail{
+    background:#fff;border:2.5px solid var(--ink);border-radius:20px;box-shadow:6px 6px 0 var(--blue);
+    padding:18px;position:sticky;top:18px;transition:opacity .4s;
+  }
+  body.packing .rail,body.packing .under,body.packing header.top{opacity:0;pointer-events:none;transition:opacity .3s}
+  .step{border-top:2px dashed rgba(91,66,56,.26);padding:16px 0 2px}
+  .step:first-child{border-top:0;padding-top:0}
+  .step h2{font-size:15px;margin:0 0 12px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .step h2 b{
+    width:25px;height:25px;border-radius:50%;background:var(--pink);border:2px solid var(--ink);
+    display:grid;place-items:center;font-size:12.5px;font-family:var(--round);
+  }
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:2px}
+  .field label{display:block;font-size:12.5px;font-weight:700;margin-bottom:5px}
+  .field input[type=text]{width:100%;padding:9px 11px;border:2px solid var(--ink);border-radius:12px;background:#FFFDF6}
+  .field input[type=text]:focus-visible,.drop:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+
+  .drop{
+    border:2.5px dashed var(--ink);border-radius:16px;background:#FFFDF6;
+    padding:18px 12px;text-align:center;cursor:pointer;transition:background .15s,transform .15s;
+  }
+  .drop:hover,.drop.hot{background:var(--butter);transform:rotate(-1deg)}
+  .drop strong{display:block;font-size:14.5px}
+  .drop small{opacity:.68}
+  .tray{display:flex;flex-wrap:wrap;gap:10px;margin-top:11px}
+  .chip{
+    position:relative;width:56px;height:56px;border:2px solid var(--ink);border-radius:12px;
+    background:#fff center/cover no-repeat;box-shadow:2px 2px 0 var(--butter);
+  }
+  .chip:nth-child(even){transform:rotate(2.5deg)}
+  .chip:nth-child(3n){transform:rotate(-3deg)}
+  .chip button{
+    position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;
+    border:2px solid var(--ink);background:var(--pink);color:var(--ink);font-size:12px;line-height:1;
+    cursor:pointer;padding:0;font-weight:900;
+  }
+  .swatches{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+  .sw{width:36px;height:36px;border-radius:11px;border:2.5px solid var(--ink);cursor:pointer;padding:0}
+  .sw[aria-pressed=true]{box-shadow:0 0 0 3px var(--butter),3px 3px 0 var(--ink);transform:translateY(-2px)}
+  .picker{display:flex;align-items:center;gap:9px;border:2px solid var(--ink);border-radius:12px;padding:6px 10px;background:#FFFDF6}
+  .picker input[type=color]{width:32px;height:32px;padding:0;border:2px solid var(--ink);border-radius:8px;background:none;cursor:pointer}
+  .picker span{font-size:12.5px;font-weight:700}
+  input[type=range]{width:100%;accent-color:var(--pink)}
+  input[type=file]{font-size:12.5px;max-width:100%}
+
+  .btn{
+    width:100%;padding:12px;border:2.5px solid var(--ink);border-radius:14px;background:#fff;
+    font-weight:800;cursor:pointer;box-shadow:4px 4px 0 var(--blue);
+  }
+  .btn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+  .btn.go{
+    background:var(--pink);font-family:var(--round);font-size:18px;padding:15px;
+    box-shadow:4px 4px 0 var(--ink);
+  }
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .railfoot{border-top:2px dashed rgba(91,66,56,.26);margin-top:16px;padding-top:14px}
+  .warn{font-size:12.5px;opacity:.75;margin:9px 0 0;text-align:center}
+
+  @media (max-width:920px){
+    #studio{grid-template-columns:1fr}
+    .rail{position:static}
+    .stage.showcase{width:min(92vw,72vh)}
+    .win,.t1,.t2,.s1{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .loadbag i,.loadbag .band{animation:none}
+    .stage.showcase{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loadbag"><div class="band">PACK</div><i></i><i></i><i></i></div>
+  <div class="bar"><span id="loadBar"></span></div>
+  <p id="loadWord">비닐 펴는 중</p>
+</div>
+
+<div id="backdrop" hidden></div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="deco win" aria-hidden="true">
+      <div class="winbar"><span></span><b>×</b></div>
+      <p>포장 준비 완료</p>
+      <em class="ok">OK</em>
+    </div>
+    <span class="deco tag t1" aria-hidden="true">&lt;html&gt;</span>
+    <span class="deco tag t2" aria-hidden="true">&lt;/body&gt;</span>
+    <span class="deco star s1" aria-hidden="true">★</span>
+    <span class="deco star s2" aria-hidden="true">✿</span>
+    <span class="play" aria-hidden="true">▶ PLAY</span>
+    <h1 class="outlined">스티커팩<br>포장소</h1>
+    <p class="lede">이미지에 테두리를 둘러 스티커로 만들고, 투명 팩에 담아 종이띠와 바코드로 봉해 드립니다.</p>
+  </header>
+
+  <section id="studio">
+    <div id="stageWrap">
+      <div class="stage" id="stage">
+        <canvas id="cv" width="1440" height="1600" tabindex="0" role="button" aria-label="스티커팩. 눌러서 흔들기"></canvas>
+        <div class="hint" id="hint">팩을 누르거나 폰을 흔들어 보세요</div>
+      </div>
+      <div class="under">
+        <button class="ghost" id="motionBtn" hidden>흔들기 감지 켜기</button>
+        <span class="note" id="status">이미지를 넣고 포장하기를 누르세요.</span>
+      </div>
+    </div>
+
+    <aside class="rail" id="rail">
+      <div class="step">
+        <h2><b>1</b>스티커로 만들 이미지</h2>
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="이미지 고르기">
+          <strong id="dropTitle">이미지 고르기</strong>
+          <small>여기로 끌어다 놓아도 됩니다 · 배경 없는 PNG 추천</small>
+        </div>
+        <input type="file" id="files" accept="image/*" multiple hidden>
+        <div class="tray" id="tray"></div>
+      </div>
+
+      <div class="step">
+        <h2><b>2</b>팩에 넣을 글자</h2>
+        <div class="field">
+          <label for="title">팩 이름</label>
+          <input type="text" id="title" value="VINCERE" maxlength="14" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="names">캐릭터 · 작가 이름</label>
+          <input type="text" id="names" value="Seo In-hyuk, Park Yu-jun" maxlength="60" autocomplete="off">
+        </div>
+        <div class="field row2">
+          <div>
+            <label for="count">개수 표기</label>
+            <input type="text" id="count" value="X08" maxlength="6" autocomplete="off">
+          </div>
+          <div>
+            <label for="bcnum">바코드 번호</label>
+            <input type="text" id="bcnum" value="880 VNC 0431" maxlength="16" autocomplete="off">
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <h2><b>3</b>색과 글꼴</h2>
+        <div class="swatches" id="swatches"></div>
+        <div class="field row2">
+          <div class="picker">
+            <input type="color" id="bandColor" value="#C4211C" aria-label="종이띠 색"><span>종이띠</span>
+          </div>
+          <div class="picker">
+            <input type="color" id="accentColor" value="#171210" aria-label="글자 색"><span>글자</span>
+          </div>
+        </div>
+        <div class="field row2">
+          <div class="picker">
+            <input type="color" id="outlineColor" value="#FFFFFF" aria-label="스티커 테두리 색"><span>테두리</span>
+          </div>
+          <div class="picker">
+            <input type="color" id="bgColor" value="#A8C8E8" aria-label="뒤 체크무늬 색"><span>뒤 체크</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="outlineWidth">테두리 두께 <output id="owOut">보통</output></label>
+          <input type="range" id="outlineWidth" min="0" max="9" step="0.5" value="4.5">
+        </div>
+        <div class="field">
+          <label for="fontFile">팩 이름 글꼴 <output id="fontState" class="note">불러오는 중</output></label>
+          <input type="file" id="fontFile" accept=".otf,.ttf,.woff,.woff2">
+        </div>
+      </div>
+
+      <div class="railfoot">
+        <button class="btn go" id="pack" disabled>포장하기</button>
+        <p class="warn" id="warn">이미지를 한 장 이상 넣으면 포장할 수 있습니다.</p>
+        <div class="btn-row">
+          <button class="btn" id="shuffle">다시 섞기</button>
+          <button class="btn" id="save">PNG로 저장</button>
+        </div>
+      </div>
+    </aside>
+  </section>
+</div>
+
+<script>
+"use strict";
+/* ==========================================================
+   스티커팩 포장소
+   팩은 캔버스 한 장으로 그려서 화면과 저장본이 같습니다.
+   ========================================================== */
+const W=720,H=800,DPR=2;
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+ctx.imageSmoothingQuality='high';
+cv.width=W*DPR; cv.height=H*DPR;
+const $=id=>document.getElementById(id);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const easeOutCubic=t=>1-Math.pow(1-t,3);
+const easeOutBack=(t,s=1.7)=>1+(s+1)*Math.pow(t-1,3)+s*Math.pow(t-1,2);
+
+/* ---------- 색 ---------- */
+function rgbOf(h){h=h.replace('#','');if(h.length===3)h=[...h].map(c=>c+c).join('');
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function hexOf(r){return '#'+r.map(v=>clamp(Math.round(v),0,255).toString(16).padStart(2,'0')).join('');}
+function mix(a,b,t){const A=rgbOf(a),B=rgbOf(b);return hexOf(A.map((v,i)=>lerp(v,B[i],t)));}
+function lumOf(h){const[r,g,b]=rgbOf(h).map(v=>v/255);return .2126*r+.7152*g+.0722*b;}
+
+let bandColor='#C4211C', accentColor='#171210', theme=null;
+function buildTheme(){
+  const light=lumOf(bandColor)>0.6;
+  theme={
+    band:bandColor,
+    bandTop:mix(bandColor,'#FFFFFF',light?.34:.14),
+    titleInk:accentColor,
+    titleHalo: light? '#FFFFFF' : mix(bandColor,'#FFF6E6',.86),
+    rule: light? mix(accentColor,bandColor,.4) : mix(accentColor,'#FFFFFF',.5),
+    text: light? mix(accentColor,'#221A16',.15) : mix(accentColor,'#FFF6E6',.78),
+    pillBg: accentColor,
+    pillInk: mix(bandColor,'#FFFFFF',light?.0:.15),
+    holo:[mix(accentColor,'#FFFFFF',.84), mix(bandColor,'#FFFFFF',.82), mix(accentColor,'#FFFFFF',.66)],
+    doodle:[mix(accentColor,'#FFFFFF',.25), mix(bandColor,'#FFFFFF',.36), mix(bandColor,'#F2C14E',.55), mix(accentColor,'#FFFFFF',.6)],
+    staple: light?'rgba(0,0,0,.16)':'rgba(0,0,0,.24)'
+  };
+}
+const PRESETS=[
+  {name:'빈체레', band:'#C4211C', accent:'#171210'},
+  {name:'크림',   band:'#F4E2C4', accent:'#B4231F'},
+  {name:'수영장', band:'#2C6E8F', accent:'#FFE9A8'},
+  {name:'자정',   band:'#1B1720', accent:'#F2C14E'},
+];
+buildTheme();
+
+/* ---------- 글꼴 ---------- */
+const TITLE_FF='"KblJumpExtended","Arial Black","Helvetica Neue",Impact,system-ui,sans-serif';
+const LABEL_FF='"Arial Black","Helvetica Neue",system-ui,sans-serif';
+const BODY_FF='"Pretendard","Apple SD Gothic Neo",system-ui,sans-serif';
+let titleFontReady=false;
+const titleFont=size=>`${titleFontReady?'':'900 '}${size}px ${TITLE_FF}`;
+async function loadTitleFont(){
+  const sources=[
+    "url('KBLJump_EB_Extended.otf') format('opentype')",
+    "url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-5@1.0/KBLJump_EB_ExtendedTTF.woff2') format('woff2')"
+  ];
+  for(const src of sources){
+    try{
+      const f=new FontFace('KblJumpExtended',src);
+      await f.load(); document.fonts.add(f); titleFontReady=true;
+      $('fontState').textContent='KBLJump EB Extended 적용됨'; return;
+    }catch(e){}
+  }
+  $('fontState').textContent='불러오지 못했습니다. 파일을 직접 넣어주세요';
+}
+$('fontFile').addEventListener('change', async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    const face=new FontFace('KblJumpExtended', await f.arrayBuffer());
+    await face.load(); document.fonts.add(face); titleFontReady=true;
+    $('fontState').textContent=f.name+' 적용됨';
+  }catch(err){ $('fontState').textContent='이 파일은 읽을 수 없습니다'; }
+});
+
+/* ---------- 소리 ---------- */
+let AC=null,noiseBuf=null;
+function audio(){
+  if(AC){ if(AC.state==='suspended') AC.resume(); return AC; }
+  AC=new (window.AudioContext||window.webkitAudioContext)();
+  const len=AC.sampleRate*2,b=AC.createBuffer(1,len,AC.sampleRate),d=b.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+  noiseBuf=b; return AC;
+}
+function grain(t,dur,freq,q,gain,type='bandpass'){
+  const ac=audio(),src=ac.createBufferSource(); src.buffer=noiseBuf;
+  src.playbackRate.value=rnd(.8,1.3);
+  const f=ac.createBiquadFilter(); f.type=type; f.frequency.value=freq; f.Q.value=q;
+  const g=ac.createGain();
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(gain,t+dur*.15);
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  src.connect(f); f.connect(g); g.connect(ac.destination);
+  src.start(t,Math.random()*1.5); src.stop(t+dur+.02);
+}
+function sndPaper(v=1){const t=audio().currentTime,n=Math.round(rnd(9,18)*v);
+  for(let i=0;i<n;i++) grain(t+Math.random()*.34*v,rnd(.012,.05),rnd(1800,6500),rnd(.6,3),rnd(.02,.08)*v);}
+function sndSlip(){const t=audio().currentTime;
+  for(let i=0;i<5;i++) grain(t+Math.random()*.09,rnd(.02,.06),rnd(2500,7000),rnd(.5,2),rnd(.015,.045));}
+function sndClick(){
+  const ac=audio(),t=ac.currentTime;
+  grain(t,.03,4200,1,.16,'highpass');
+  const o=ac.createOscillator(),g=ac.createGain();
+  o.type='triangle'; o.frequency.setValueAtTime(1100,t); o.frequency.exponentialRampToValueAtTime(420,t+.07);
+  g.gain.setValueAtTime(.14,t); g.gain.exponentialRampToValueAtTime(.0001,t+.09);
+  o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.1); sndPaper(.5);
+}
+function sndTap(){
+  const ac=audio(),t=ac.currentTime;
+  grain(t,.05,1600,.7,.12);
+  const o=ac.createOscillator(),g=ac.createGain();
+  o.type='sine'; o.frequency.setValueAtTime(220,t); o.frequency.exponentialRampToValueAtTime(90,t+.1);
+  g.gain.setValueAtTime(.1,t); g.gain.exponentialRampToValueAtTime(.0001,t+.12);
+  o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.13);
+}
+
+/* ---------- 이미지 → 스티커 ---------- */
+let outlineColor='#FFFFFF', outlineWidth=4.5;
+function hasAlpha(img){
+  const s=64,c=document.createElement('canvas'); c.width=c.height=s;
+  const x=c.getContext('2d'); x.drawImage(img,0,0,s,s);
+  const d=x.getImageData(0,0,s,s).data;
+  for(let i=3;i<d.length;i+=4) if(d[i]<250) return true;
+  return false;
+}
+function sharpenAlpha(c, lo=.4, hi=.62){
+  const g=c.getContext('2d');
+  let d; try{ d=g.getImageData(0,0,c.width,c.height); }catch(e){ return c; }
+  const p=d.data, span=hi-lo;
+  for(let i=3;i<p.length;i+=4){
+    const a=p[i]/255;
+    p[i] = a<=lo ? 0 : a>=hi ? 255 : Math.round(255*(a-lo)/span);
+  }
+  g.putImageData(d,0,0);
+  return c;
+}
+/* 원판을 여러 방향으로 조금씩 겹쳐 찍어 반지름 r 만큼 부풀린다 */
+function dilate(src,r){
+  if(r<=0) return src;
+  const passes = r>=6?3:1, dirs=16, step=r/passes, snap=step>=2;
+  let cur=src;
+  for(let p=0;p<passes;p++){
+    const nx=document.createElement('canvas'); nx.width=src.width; nx.height=src.height;
+    const g=nx.getContext('2d');
+    g.drawImage(cur,0,0);
+    for(let i=0;i<dirs;i++){
+      const a=i/dirs*Math.PI*2 + p*Math.PI/(dirs*1.5);
+      const dx=Math.cos(a)*step, dy=Math.sin(a)*step;
+      g.drawImage(cur, snap?Math.round(dx):dx, snap?Math.round(dy):dy);
+    }
+    cur=nx;
+  }
+  return cur;
+}
+function colorize(c,color){
+  const g=c.getContext('2d');
+  g.globalCompositeOperation='source-in';
+  g.fillStyle=color; g.fillRect(0,0,c.width,c.height);
+  g.globalCompositeOperation='source-over';
+  return c;
+}
+function makeSticker(img){
+  const MAX=700, k=Math.min(1,MAX/Math.max(img.width,img.height));
+  const w=Math.max(2,Math.round(img.width*k)), h=Math.max(2,Math.round(img.height*k));
+  const base=document.createElement('canvas'); base.width=w; base.height=h;
+  const bx=base.getContext('2d');
+  bx.imageSmoothingQuality='high';
+  if(!hasAlpha(img)){
+    const r=Math.min(w,h)*.09;
+    bx.beginPath(); bx.moveTo(r,0);
+    bx.arcTo(w,0,w,h,r); bx.arcTo(w,h,0,h,r); bx.arcTo(0,h,0,0,r); bx.arcTo(0,0,w,0,r);
+    bx.closePath(); bx.clip();
+  }
+  bx.drawImage(img,0,0,w,h);
+
+  const rad=Math.round(Math.max(w,h)*outlineWidth/100);
+  if(rad<=0) return base;
+
+  // 판형: 반투명 가장자리를 한 번 끊어 또렷한 실루엣으로 만든다
+  const sil=document.createElement('canvas'); sil.width=w; sil.height=h;
+  const sx=sil.getContext('2d');
+  sx.drawImage(base,0,0);
+  sx.globalCompositeOperation='source-in'; sx.fillStyle='#fff'; sx.fillRect(0,0,w,h);
+  sharpenAlpha(sil,.42,.6);
+
+  const pad=rad+6, ow=w+pad*2, oh=h+pad*2;
+  const seed=document.createElement('canvas'); seed.width=ow; seed.height=oh;
+  seed.getContext('2d').drawImage(sil,pad,pad);
+
+  const inner=sharpenAlpha(dilate(seed, rad*.72), .35, .58);
+  const outer=sharpenAlpha(dilate(inner, rad*.28), .35, .58);
+  colorize(outer, mix(outlineColor,'#221A16',.2));
+  colorize(inner, outlineColor);
+
+  const out=document.createElement('canvas'); out.width=ow; out.height=oh;
+  const ox=out.getContext('2d');
+  ox.drawImage(outer,0,0);
+  ox.drawImage(inner,0,0);
+  ox.drawImage(base,pad,pad);
+  return out;
+}
+function thumbURL(c){
+  const s=112,t=document.createElement('canvas'); t.width=t.height=s;
+  const g=t.getContext('2d'), k=Math.min(s/c.width,s/c.height)*.92;
+  g.imageSmoothingQuality='high';
+  g.drawImage(c,(s-c.width*k)/2,(s-c.height*k)/2,c.width*k,c.height*k);
+  return t.toDataURL();
+}
+
+/* ---------- 상태 ---------- */
+let stickers=[];
+let phase='ready';          // ready | filling | clipping | barcode | done
+let phaseT=0, headerP=1, bcP=1, packRot=0, packRotV=0;
+let clickedFlag=false, tappedFlag=false;
+const AREA={x:56,y:300,w:608,h:440};
+
+function sizeOf(s){
+  const k=s.size/Math.max(s.c.width,s.c.height);
+  s.w=s.c.width*k; s.h=s.c.height*k; s.rad=Math.max(s.w,s.h)*.42;
+}
+function layout(){
+  const n=stickers.length; if(!n) return;
+  // 모든 스티커를 같은 크기로: 긴 변 기준 한 값을 공유한다
+  const cell=Math.sqrt(AREA.w*AREA.h/n)*1.25;
+  const size=Math.min(cell, AREA.w*.66, AREA.h*.66);
+  stickers.forEach(s=>{
+    s.size=size; sizeOf(s);
+    s.tx=rnd(AREA.x+s.rad,AREA.x+AREA.w-s.rad);
+    s.ty=rnd(AREA.y+s.rad,AREA.y+AREA.h-s.rad);
+    s.trot=rnd(-.34,.34);
+  });
+  for(let it=0;it<160;it++){
+    for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+      const a=stickers[i],b=stickers[j];
+      let dx=b.tx-a.tx,dy=b.ty-a.ty,d=Math.hypot(dx,dy)||.01;
+      const min=(a.rad+b.rad)*.82;
+      if(d<min){const p=(min-d)/d*.5;dx*=p;dy*=p;a.tx-=dx;a.ty-=dy;b.tx+=dx;b.ty+=dy;}
+    }
+    stickers.forEach(s=>{
+      s.tx=clamp(s.tx,AREA.x+s.rad*.9,AREA.x+AREA.w-s.rad*.9);
+      s.ty=clamp(s.ty,AREA.y+s.rad*.9,AREA.y+AREA.h-s.rad*.9);
+    });
+  }
+  stickers.sort((a,b)=>a.ty-b.ty);
+  stickers.forEach((s,i)=>{
+    s.sx = Math.random()<.5 ? rnd(-140,W*.4) : rnd(W*.6,W+140);
+    s.sy = rnd(-320,-90); s.srot=rnd(-2.2,2.2);
+    s.delay=i*(reduced?40:95)+rnd(0,50);
+    s.slipped=false; s.landed=false;
+  });
+}
+let rebuildTimer=null;
+function rebuildStickers(){
+  clearTimeout(rebuildTimer);
+  if(stickers.length) setStatus('테두리 다시 만드는 중…');
+  rebuildTimer=setTimeout(()=>{
+    stickers.forEach(s=>{ s.c=makeSticker(s.img); sizeOf(s); });
+    drawTray();
+    if(stickers.length) setStatus('테두리를 새로 만들었습니다.');
+  },90);
+}
+
+/* ---------- 글자 유틸 ---------- */
+function tracked(c,text,x,y,sp,mode='fill',align='left'){
+  const ch=[...text]; let total=0;
+  for(const t of ch) total+=c.measureText(t).width+sp;
+  total-=sp;
+  let px = align==='center'? x-total/2 : align==='right'? x-total : x;
+  for(const t of ch){
+    if(mode==='strokeFill'){ c.strokeText(t,px,y); c.fillText(t,px,y); }
+    else if(mode==='stroke') c.strokeText(t,px,y);
+    else c.fillText(t,px,y);
+    px+=c.measureText(t).width+sp;
+  }
+  return total;
+}
+function fitTitle(c,text,maxW,start){
+  let size=start;
+  while(size>18){
+    c.font=titleFont(size);
+    const sp=size*.05;
+    let tw=0; for(const t of [...text]) tw+=c.measureText(t).width+sp;
+    if(tw-sp<=maxW) break;
+    size-=2;
+  }
+  return size;
+}
+
+/* ---------- 팩 ---------- */
+function bagPath(c){
+  const x=28,y=52,w=W-56,h=H-96,r=20;
+  c.beginPath(); c.moveTo(x+r,y);
+  c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+  c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+  return {x,y,w,h};
+}
+function holePath(c,hy){
+  const cx=W/2, cy=hy+46;
+  c.beginPath(); c.arc(cx,cy,16,Math.PI,0);
+  c.lineTo(cx+8.5,cy+26); c.arc(cx,cy+26,8.5,0,Math.PI); c.lineTo(cx-16,cy); c.closePath();
+}
+let doodles=[];
+function seedDoodles(){
+  doodles=[];
+  const kinds=['star','spark','dot','squig','heart','cloud'];
+  for(let i=0;i<18;i++) doodles.push({
+    k:kinds[(Math.random()*kinds.length)|0],
+    x:rnd(AREA.x-10,AREA.x+AREA.w+10), y:rnd(AREA.y-14,AREA.y+AREA.h+14),
+    s:rnd(9,24), r:rnd(0,6.28), ci:(Math.random()*4)|0, a:rnd(.55,1)
+  });
+}
+function drawDoodles(c){
+  doodles.forEach(d=>{
+    const col=theme.doodle[d.ci%theme.doodle.length];
+    c.save(); c.translate(d.x,d.y); c.rotate(d.r); c.globalAlpha=d.a;
+    c.fillStyle=col; c.strokeStyle=col; c.lineWidth=3; c.lineCap='round';
+    const s=d.s;
+    if(d.k==='star'||d.k==='spark'){
+      const pts=d.k==='star'?5:4, inner=d.k==='star'?.45:.28;
+      c.beginPath();
+      for(let i=0;i<pts*2;i++){const a=i*Math.PI/pts-Math.PI/2,rr=i%2?s*inner:s;
+        c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}
+      c.closePath(); c.fill();
+    }else if(d.k==='dot'){ c.beginPath(); c.arc(0,0,s*.36,0,6.283); c.fill(); }
+    else if(d.k==='squig'){ c.beginPath(); c.moveTo(-s,0); c.bezierCurveTo(-s*.4,-s*.9,s*.4,s*.9,s,0); c.stroke(); }
+    else if(d.k==='heart'){
+      c.beginPath(); c.moveTo(0,s*.5);
+      c.bezierCurveTo(-s*1.1,-s*.35,-s*.35,-s*.95,0,-s*.25);
+      c.bezierCurveTo(s*.35,-s*.95,s*1.1,-s*.35,0,s*.5); c.fill();
+    }else{
+      c.beginPath(); c.arc(-s*.45,0,s*.42,0,6.283); c.arc(s*.1,-s*.15,s*.55,0,6.283);
+      c.arc(s*.6,.05,s*.38,0,6.283); c.fill();
+    }
+    c.restore();
+  });
+}
+function drawInner(c,bag){
+  const g=c.createLinearGradient(bag.x,bag.y,bag.x+bag.w,bag.y+bag.h);
+  g.addColorStop(0,theme.holo[0]); g.addColorStop(.5,theme.holo[1]); g.addColorStop(1,theme.holo[2]);
+  c.save(); c.globalAlpha=.72; c.fillStyle=g;
+  c.beginPath(); c.roundRect(AREA.x-26,AREA.y-40,AREA.w+52,AREA.h+70,44); c.fill();
+  ['#FFFFFF',theme.holo[2],theme.holo[0]].forEach((col,i)=>{
+    const px=AREA.x+AREA.w*(.25+i*.3), py=AREA.y+AREA.h*(.2+i*.28);
+    const rg=c.createRadialGradient(px,py,8,px,py,190);
+    rg.addColorStop(0,col); rg.addColorStop(1,'rgba(255,255,255,0)');
+    c.globalAlpha=.5; c.fillStyle=rg; c.fillRect(bag.x,bag.y,bag.w,bag.h);
+  });
+  c.restore();
+}
+function drawStickers(c){
+  stickers.forEach(s=>{
+    if(s.p<=0) return;
+    const e = phase==='filling'? easeOutBack(clamp(s.p,0,1),1.35) : 1;
+    const x=lerp(s.sx,s.tx,e)+s.ox, y=lerp(s.sy,s.ty,e)+s.oy;
+    const rot=lerp(s.srot,s.trot,easeOutCubic(clamp(s.p,0,1)))+s.orot;
+    c.save(); c.translate(x,y); c.rotate(rot);
+    c.shadowColor='rgba(34,26,22,.28)'; c.shadowBlur=13; c.shadowOffsetY=5;
+    c.drawImage(s.c,-s.w/2,-s.h/2,s.w,s.h);
+    c.restore();
+  });
+}
+function drawEmpty(c){
+  c.save();
+  c.setLineDash([10,9]); c.lineWidth=2.5; c.strokeStyle='rgba(34,26,22,.3)';
+  c.beginPath(); c.roundRect(AREA.x,AREA.y,AREA.w,AREA.h,26); c.stroke();
+  c.setLineDash([]); c.textAlign='center'; c.fillStyle='rgba(34,26,22,.5)';
+  c.font=`800 21px ${BODY_FF}`;
+  c.fillText('여기에 스티커가 담깁니다', W/2, AREA.y+AREA.h/2-4);
+  c.font=`600 15px ${BODY_FF}`;
+  c.fillText('이미지를 넣고 포장하기를 누르세요', W/2, AREA.y+AREA.h/2+24);
+  c.textAlign='left'; c.restore();
+}
+function drawPlastic(c,bag){
+  c.save();
+  const gl=c.createLinearGradient(bag.x,bag.y,bag.x+bag.w*.8,bag.y+bag.h);
+  gl.addColorStop(0,'rgba(255,255,255,.42)'); gl.addColorStop(.35,'rgba(255,255,255,0)');
+  gl.addColorStop(.62,'rgba(255,255,255,.22)'); gl.addColorStop(1,'rgba(255,255,255,0)');
+  c.fillStyle=gl; c.fillRect(bag.x,bag.y,bag.w,bag.h);
+  c.strokeStyle='rgba(255,255,255,.5)'; c.lineWidth=2.4; c.lineCap='round';
+  [[.06,.2,.3,.42],[.72,.12,.95,.4],[.1,.78,.34,.96],[.6,.62,.9,.9],[.42,.1,.52,.3]]
+  .forEach(([x1,y1,x2,y2])=>{
+    c.beginPath(); c.moveTo(bag.x+bag.w*x1,bag.y+bag.h*y1);
+    c.quadraticCurveTo(bag.x+bag.w*(x1+x2)/2+18,bag.y+bag.h*(y1+y2)/2-24,bag.x+bag.w*x2,bag.y+bag.h*y2);
+    c.stroke();
+  });
+  c.restore();
+}
+/* 종이띠: 왼쪽 정렬 제목 + 가는 선 + 개수 라벨 + 오른쪽 이름 */
+function drawHeader(c,offY){
+  const hx=20, hy=8+offY, hw=W-40, hh=268, r=14;
+  const L=hx+36, R=hx+hw-36;
+  c.save();
+  c.shadowColor='rgba(34,26,22,.32)'; c.shadowBlur=16; c.shadowOffsetY=7;
+  c.fillStyle=theme.band;
+  c.beginPath(); c.roundRect(hx,hy,hw,hh,[r,r,7,7]); c.fill();
+  c.shadowColor='transparent';
+  const gt=c.createLinearGradient(0,hy,0,hy+40);
+  gt.addColorStop(0,theme.bandTop); gt.addColorStop(1,theme.band);
+  c.fillStyle=gt; c.beginPath(); c.roundRect(hx,hy,hw,40,[r,r,0,0]); c.fill();
+  c.textBaseline='alphabetic';
+
+  // 제목: 굵은 획 뒤로 두른 뒤 속을 채운다
+  const title=$('title').value||'PACK';
+  const size=fitTitle(c,title,R-L,92);
+  c.font=titleFont(size);
+  c.lineJoin='round'; c.miterLimit=2;
+  c.lineWidth=Math.max(4,size*.15);
+  c.strokeStyle=theme.titleHalo; c.fillStyle=theme.titleInk;
+  tracked(c,title,L,hy+164,size*.05,'strokeFill');
+
+  // 가는 선
+  c.strokeStyle=theme.rule; c.lineWidth=2.2; c.globalAlpha=.9;
+  c.beginPath(); c.moveTo(L,hy+186); c.lineTo(R,hy+186); c.stroke();
+  c.globalAlpha=1;
+
+  // 개수 라벨
+  const cnt=('STICKERS '+($('count').value||'X08')).toUpperCase();
+  c.font=`800 17px ${LABEL_FF}`;
+  const tw=[...cnt].reduce((a,ch)=>a+c.measureText(ch).width+2.2,0)-2.2;
+  c.fillStyle=theme.pillBg;
+  c.beginPath(); c.roundRect(L-11,hy+199,tw+22,29,7); c.fill();
+  c.fillStyle=theme.pillInk;
+  tracked(c,cnt,L,hy+219,2.2);
+
+  // 이름
+  c.fillStyle=theme.text; c.font=`600 14px ${BODY_FF}`;
+  const names=($('names').value||'').split(/[,·]/).map(s=>s.trim()).filter(Boolean).slice(0,2);
+  names.forEach((n,i)=>{
+    const w2=c.measureText(n).width;
+    c.fillText(n, R-w2, hy+(names.length>1? 210+i*19 : 219));
+  });
+
+  // 아래 줄
+  c.fillStyle=theme.text; c.font=`700 13px ${LABEL_FF}`;
+  tracked(c,'STICKER PACK',L,hy+250,7.5);
+  c.fillStyle=theme.text; c.globalAlpha=.7;
+  c.font=`600 12px ${LABEL_FF}`;
+  const made='MADE IN PACKING STUDIO';
+  const mw=[...made].reduce((a,ch)=>a+c.measureText(ch).width+1.6,0)-1.6;
+  tracked(c,made,R-mw,hy+250,1.6);
+  c.globalAlpha=1;
+
+  c.fillStyle=theme.staple;
+  for(let x=hx+130;x<hx+hw-130;x+=26) c.fillRect(x,hy+hh-6,13,4);
+  c.restore();
+  return {hx,hy,hw,hh};
+}
+function drawBarcode(c,p){
+  if(p<=0) return;
+  const num=$('bcnum').value||'880 VNC 0431';
+  const bw=196,bh=98,cx=W-150,cy=H-118,e=easeOutBack(clamp(p,0,1),2);
+  c.save();
+  c.translate(cx,cy); c.rotate(lerp(.5,-.035,e)); c.scale(lerp(1.7,1,e),lerp(1.7,1,e));
+  c.globalAlpha=clamp(p*2,0,1);
+  c.shadowColor='rgba(34,26,22,.3)'; c.shadowBlur=10; c.shadowOffsetY=4;
+  c.fillStyle='#fff'; c.beginPath(); c.roundRect(-bw/2,-bh/2,bw,bh,5); c.fill();
+  c.shadowColor='transparent';
+  let seed=0; for(const ch of num) seed+=ch.charCodeAt(0);
+  let x=-bw/2+11; c.fillStyle='#17120F';
+  while(x<bw/2-11){
+    seed=(seed*9301+49297)%233280;
+    const w=1.4+(seed/233280)*3.6;
+    if((seed>>3)%3) c.fillRect(x,-bh/2+9,w,bh-34);
+    x+=w+1.6+((seed>>5)%3)*.7;
+  }
+  c.font='700 15px "Courier New",monospace'; c.textAlign='center';
+  c.fillText(num,0,bh/2-9); c.textAlign='left';
+  c.restore();
+}
+function render(c,scale){
+  c.imageSmoothingQuality='high';
+  c.save(); c.setTransform(scale,0,0,scale,0,0);
+  c.clearRect(0,0,W,H);
+  c.translate(W/2,H/2); c.rotate(packRot); c.translate(-W/2,-H/2);
+
+  const bag=bagPath(c);
+  c.save(); bagPath(c); c.clip();
+    c.fillStyle='rgba(255,255,255,.3)'; c.fillRect(bag.x,bag.y,bag.w,bag.h);
+    drawInner(c,bag);
+    drawDoodles(c);
+    if(!stickers.length) drawEmpty(c);
+    drawStickers(c);
+    drawPlastic(c,bag);
+  c.restore();
+
+  bagPath(c);
+  c.strokeStyle='rgba(255,255,255,.85)'; c.lineWidth=3; c.stroke();
+  c.strokeStyle='rgba(70,60,55,.32)'; c.lineWidth=1.2; c.stroke();
+
+  if(headerP>0){
+    const hd=drawHeader(c,lerp(-340,0,easeOutBack(clamp(headerP,0,1),1.5)));
+    if(headerP>.55){
+      c.save(); c.globalCompositeOperation='destination-out'; c.fillStyle='#000';
+      holePath(c,hd.hy); c.fill(); c.restore();
+      holePath(c,hd.hy); c.strokeStyle='rgba(0,0,0,.2)'; c.lineWidth=1.5; c.stroke();
+    }
+  }
+  drawBarcode(c,bcP);
+  c.restore();
+}
+
+/* ---------- 루프 ---------- */
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(50,now-last); last=now;
+  if(phase!=='ready'&&phase!=='done') phaseT+=dt;
+
+  if(phase==='filling'){
+    let done=true;
+    stickers.forEach(s=>{
+      const p=(phaseT-s.delay)/(reduced?280:620);
+      if(p<1) done=false;
+      s.p=clamp(p,0,1);
+      if(!s.slipped&&p>0){ s.slipped=true; sndSlip(); }
+      if(!s.landed&&p>=1){ s.landed=true; s.vx+=rnd(-1.2,1.2); s.vy+=rnd(-1,1); s.vr+=rnd(-.02,.02); }
+    });
+    if(done){ phase='clipping'; phaseT=0; }
+  }
+  if(phase==='clipping'){
+    headerP=clamp(phaseT/(reduced?260:560),0,1);
+    if(!clickedFlag&&headerP>.5){ clickedFlag=true; sndClick(); impulse(.9); }
+    if(headerP>=1){ phase='barcode'; phaseT=0; }
+  }
+  if(phase==='barcode'){
+    if(phaseT>180){
+      bcP=clamp((phaseT-180)/(reduced?200:420),0,1);
+      if(!tappedFlag){ tappedFlag=true; sndTap(); }
+    }
+    if(bcP>=1) finish();
+  }
+
+  const k=.14,damp=.87;
+  stickers.forEach(s=>{
+    s.vx+=-k*s.ox; s.vy+=-k*s.oy; s.vr+=-k*s.orot*1.4;
+    s.vx*=damp; s.vy*=damp; s.vr*=damp;
+    s.ox+=s.vx; s.oy+=s.vy; s.orot+=s.vr;
+  });
+  packRotV+=-.1*packRot; packRotV*=.88; packRot+=packRotV;
+
+  render(ctx,DPR);
+  requestAnimationFrame(loop);
+}
+function impulse(f=1){
+  stickers.forEach(s=>{ s.vx+=rnd(-7,7)*f; s.vy+=rnd(-6,6)*f; s.vr+=rnd(-.07,.07)*f; });
+  packRotV+=rnd(-.012,.012)*f;
+}
+
+/* ---------- 포장 연출 ---------- */
+const stage=$('stage'), stageWrap=$('stageWrap'), backdrop=$('backdrop'), hint=$('hint');
+const setStatus=t=>{ $('status').textContent=t; };
+function enterShowcase(){
+  stageWrap.style.minHeight=stageWrap.offsetHeight+'px';
+  backdrop.hidden=false;
+  requestAnimationFrame(()=>backdrop.classList.add('on'));
+  document.body.classList.add('packing');
+  stage.classList.add('showcase');
+}
+function exitShowcase(){
+  stage.classList.remove('showcase');
+  backdrop.classList.remove('on');
+  document.body.classList.remove('packing');
+  setTimeout(()=>{ backdrop.hidden=true; stageWrap.style.minHeight=''; },380);
+}
+function startPack(){
+  if(!stickers.length) return;
+  audio();
+  phaseT=0; headerP=0; bcP=0; clickedFlag=false; tappedFlag=false;
+  stickers.forEach(s=>{ s.p=0; s.slipped=false; s.landed=false; s.ox=s.oy=s.orot=s.vx=s.vy=s.vr=0; });
+  seedDoodles(); layout();
+  hint.classList.remove('on');
+  enterShowcase();
+  phase='filling';
+  setStatus('포장 중…');
+}
+function finish(){
+  phase='done';
+  setTimeout(()=>{
+    exitShowcase();
+    hint.classList.add('on');
+    checkReady();
+    setStatus('설정을 고치면 팩에 바로 반영됩니다.');
+  }, reduced?200:900);
+}
+
+/* ---------- 이미지 ---------- */
+const tray=$('tray'), drop=$('drop'), filesInput=$('files');
+async function addFiles(list){
+  const imgs=[...list].filter(f=>f.type.startsWith('image/')).slice(0,24-stickers.length);
+  if(!imgs.length) return;
+  for(const f of imgs){
+    try{
+      const bmp=await createImageBitmap(f);
+      stickers.push({img:bmp,c:makeSticker(bmp),size:0,w:0,h:0,rad:0,
+        tx:0,ty:0,trot:0,sx:0,sy:0,srot:0,delay:0,p:0,
+        ox:0,oy:0,orot:0,vx:0,vy:0,vr:0,slipped:false,landed:false});
+    }catch(e){ console.warn(e); }
+  }
+  drawTray();
+  $('count').value='X'+String(stickers.length).padStart(2,'0');
+  if(phase==='done'){ seedDoodles(); layout(); stickers.forEach(s=>s.p=1); impulse(.8); sndPaper(.8); }
+  checkReady();
+}
+function drawTray(){
+  tray.innerHTML='';
+  stickers.forEach((s,i)=>{
+    const d=document.createElement('div'); d.className='chip';
+    d.style.backgroundImage=`url(${thumbURL(s.c)})`;
+    const b=document.createElement('button'); b.textContent='×'; b.title='빼기';
+    b.onclick=()=>{
+      stickers.splice(i,1); drawTray();
+      $('count').value='X'+String(stickers.length).padStart(2,'0');
+      if(phase==='done'){ seedDoodles(); layout(); stickers.forEach(s2=>s2.p=1); }
+      checkReady();
+    };
+    d.appendChild(b); tray.appendChild(d);
+  });
+  $('dropTitle').textContent = stickers.length? '이미지 더 넣기' : '이미지 고르기';
+}
+function checkReady(){
+  const ok = stickers.length>0 && $('title').value.trim().length>0;
+  $('pack').disabled=!ok;
+  $('pack').textContent = phase==='done' ? '다시 포장하기' : '포장하기';
+  $('warn').textContent = stickers.length===0 ? '이미지를 한 장 이상 넣으면 포장할 수 있습니다.'
+    : !$('title').value.trim() ? '팩 이름을 적어주세요.'
+    : `${stickers.length}장을 팩에 담을 준비가 됐습니다.`;
+}
+drop.onclick=()=>filesInput.click();
+drop.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); filesInput.click(); } };
+filesInput.onchange=e=>{ addFiles(e.target.files); filesInput.value=''; };
+['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hot');}));
+document.addEventListener('dragleave',e=>{ e.preventDefault(); if(!e.relatedTarget) drop.classList.remove('hot'); });
+document.addEventListener('drop',e=>{ e.preventDefault(); drop.classList.remove('hot'); if(e.dataTransfer?.files) addFiles(e.dataTransfer.files); });
+
+/* ---------- 색 컨트롤 ---------- */
+const sw=$('swatches');
+PRESETS.forEach(p=>{
+  const b=document.createElement('button');
+  b.className='sw'; b.title=p.name;
+  b.style.background=`linear-gradient(135deg, ${p.band} 55%, ${p.accent} 55%)`;
+  b.setAttribute('aria-pressed', p.band===bandColor);
+  b.onclick=()=>{
+    bandColor=p.band; accentColor=p.accent;
+    $('bandColor').value=p.band; $('accentColor').value=p.accent;
+    buildTheme();
+    [...sw.children].forEach(c=>c.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+  };
+  sw.appendChild(b);
+});
+const clearMark=()=>[...sw.children].forEach(c=>c.setAttribute('aria-pressed','false'));
+$('bandColor').addEventListener('input',e=>{ bandColor=e.target.value; buildTheme(); clearMark(); });
+$('accentColor').addEventListener('input',e=>{ accentColor=e.target.value; buildTheme(); clearMark(); });
+$('outlineColor').addEventListener('input',e=>{ outlineColor=e.target.value; rebuildStickers(); });
+function applyStageColor(hex){
+  const [r,g,b]=rgbOf(hex);
+  document.documentElement.style.setProperty('--check',`rgba(${r},${g},${b},.5)`);
+  document.documentElement.style.setProperty('--check-base',mix(hex,'#FFFFFF',.9));
+}
+$('bgColor').addEventListener('input',e=>applyStageColor(e.target.value));
+const owLabel=v=> v<.4?'없음' : v<3?'얇게' : v<6?'보통' : '두껍게';
+$('outlineWidth').addEventListener('input',e=>{
+  outlineWidth=parseFloat(e.target.value);
+  $('owOut').textContent=owLabel(outlineWidth);
+  rebuildStickers();
+});
+['title','names','count','bcnum'].forEach(id=>$(id).addEventListener('input',checkReady));
+
+$('pack').onclick=()=>{ if(!$('pack').disabled) startPack(); };
+$('shuffle').onclick=()=>{
+  if(!stickers.length) return;
+  seedDoodles(); layout();
+  if(phase==='done'){ stickers.forEach(s=>s.p=1); headerP=1; bcP=1; impulse(1.2); sndPaper(1); }
+  else startPack();
+};
+
+/* ---------- 흔들기 ---------- */
+function shakeIt(){ if(!stickers.length||phase==='filling') return; audio(); impulse(1); sndPaper(1); }
+cv.addEventListener('pointerdown',shakeIt);
+cv.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); shakeIt(); } });
+let lastShake=0, prev={x:0,y:0,z:0};
+function onMotion(e){
+  const a=e.accelerationIncludingGravity; if(!a) return;
+  const d=Math.abs(a.x-prev.x)+Math.abs(a.y-prev.y)+Math.abs(a.z-prev.z);
+  prev={x:a.x||0,y:a.y||0,z:a.z||0};
+  const now=Date.now();
+  if(d>16 && now-lastShake>320 && phase==='done'){
+    lastShake=now; impulse(Math.min(2,d/16)); sndPaper(Math.min(1.6,d/16));
+  }
+}
+const motionBtn=$('motionBtn');
+if(typeof DeviceMotionEvent!=='undefined'){
+  if(typeof DeviceMotionEvent.requestPermission==='function'){
+    motionBtn.hidden=false;
+    motionBtn.onclick=async()=>{
+      try{
+        const r=await DeviceMotionEvent.requestPermission();
+        if(r==='granted'){ window.addEventListener('devicemotion',onMotion); motionBtn.hidden=true; audio();
+          setStatus('이제 폰을 흔들면 팩도 흔들립니다.'); }
+        else setStatus('흔들기 감지가 꺼져 있습니다. 팩을 눌러도 흔들립니다.');
+      }catch(err){ setStatus('이 브라우저에서는 흔들기 감지를 켤 수 없습니다.'); }
+    };
+  }else window.addEventListener('devicemotion',onMotion);
+}
+
+/* ---------- 저장 ---------- */
+$('save').onclick=()=>{
+  const S=3,out=document.createElement('canvas');
+  out.width=W*S; out.height=H*S;
+  render(out.getContext('2d'),S);
+  out.toBlob(b=>{
+    const name=($('title').value||'sticker').replace(/[^\w가-힣-]+/g,'_');
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b); a.download=`${name}_sticker_pack.png`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    setStatus('배경 없는 PNG로 저장했습니다.');
+  },'image/png');
+};
+
+/* ---------- 로딩 ---------- */
+(async function boot(){
+  const words=['비닐 펴는 중','테두리 자르는 중','종이띠 접는 중','바코드 찍는 중','준비 완료'];
+  const bar=$('loadBar'), word=$('loadWord');
+  let i=0;
+  const tick=setInterval(()=>{
+    i=Math.min(words.length-1,i+1);
+    word.textContent=words[i]; bar.style.width=(i+1)/words.length*100+'%';
+  }, reduced?90:340);
+  const t0=performance.now();
+  await Promise.race([ loadTitleFont(), new Promise(r=>setTimeout(r,4000)) ]);
+  try{ await document.fonts.ready; }catch(e){}
+  await new Promise(r=>setTimeout(r, Math.max(0,(reduced?400:1500)-(performance.now()-t0))));
+  clearInterval(tick);
+  word.textContent='준비 완료'; bar.style.width='100%';
+  setTimeout(()=>$('loader').classList.add('gone'), reduced?0:260);
+})();
+
+seedDoodles();
+$('owOut').textContent=owLabel(outlineWidth);
+applyStageColor($('bgColor').value);
+checkReady();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
